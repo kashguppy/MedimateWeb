@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediMate</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Welcome to MediMate</h1>
+    </header>
+
+    <!-- Step 1: User Info Section -->
+    <section id="userInfoSection" class="visible">
+        <h2>Step 1: Enter Your Personal Details</h2>
+        <form id="userForm">
+            <input type="text" id="name" placeholder="Your Name" required><br>
+            <input type="number" id="age" placeholder="Your Age" required><br>
+            <input type="number" id="weight" placeholder="Your Weight (kg)" required><br>
+            <button type="button" onclick="goToMedicationSection()">Done</button>
+        </form>
+    </section>
+
+    <!-- Step 2: Medication Upload Section -->
+    <section id="medicationSection" class="hidden">
+        <h2>Step 2: Upload Your Medications</h2>
+        <p>Upload images of your medications (one at a time):</p>
+        <input type="file" id="medicationImage" accept="image/*"><br><br>
+        <button type="button" onclick="addMedication()">Add Medication</button>
+        <button type="button" onclick="goToJournalSection()">Done</button>
+        <ul id="medicationPreview"></ul>
+    </section>
+
+    <!-- Step 3: Journal Section -->
+    <section id="journalSection" class="hidden">
+        <h2>Your Medication Schedule & Journal</h2>
+        <div id="schedule">
+            <h3>Your Medication Schedule</h3>
+            <ul id="medicationList"></ul>
+        </div>
+        <h3>Journal Your Symptoms</h3>
+        <textarea id="symptoms" placeholder="Write your symptoms here..."></textarea><br>
+        <button onclick="saveJournal()">Save Journal</button>
+        <div id="quote">
+            <p>"Every day is a chance to get stronger."</p>
+        </div>
+    </section>
+
+    <script>
+        // Placeholder medication data with times
+        const placeholderMeds = [
+            { name: "Asprin", time: "8:00 AM" },
+            { name: "Tylenol", time: "12:00 PM" },
+            { name: "Allergy", time: "6:00 PM" }
+        ];
+
+        let uploadedMedications = [];
+
+        function goToMedicationSection() {
+            const name = document.getElementById("name").value;
+            const age = document.getElementById("age").value;
+            const weight = document.getElementById("weight").value;
+
+            if (!name || !age || !weight) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            localStorage.setItem("userName", name);
+            localStorage.setItem("userAge", age);
+            localStorage.setItem("userWeight", weight);
+
+            document.getElementById("userInfoSection").classList.add("hidden");
+            document.getElementById("medicationSection").classList.remove("hidden");
+        }
+
+        function addMedication() {
+            const fileInput = document.getElementById("medicationImage");
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please upload an image.");
+                return;
+            }
+
+            // Simulate medication processing
+            const newMedication = placeholderMeds[uploadedMedications.length % placeholderMeds.length];
+            uploadedMedications.push(newMedication);
+
+            // Update the preview list
+            const previewList = document.getElementById("medicationPreview");
+            const listItem = document.createElement("li");
+            listItem.textContent = `${newMedication.name} (Time: ${newMedication.time})`;
+            previewList.appendChild(listItem);
+
+            // Reset the input for new upload
+            fileInput.value = "";
+        }
+
+        function goToJournalSection() {
+            if (uploadedMedications.length === 0) {
+                alert("Please add at least one medication.");
+                return;
+            }
+
+            localStorage.setItem("medications", JSON.stringify(uploadedMedications));
+
+            document.getElementById("medicationSection").classList.add("hidden");
+            document.getElementById("journalSection").classList.remove("hidden");
+
+            const medicationList = document.getElementById("medicationList");
+            medicationList.innerHTML = uploadedMedications
+                .map(
+                    (med, index) =>
+                        `<li>
+                            <input type="checkbox" id="med-${index}">
+                            <label for="med-${index}">${med.name} - Time: ${med.time}</label>
+                        </li>`
+                )
+                .join("");
+        }
+
+        function saveJournal() {
+            const symptoms = document.getElementById("symptoms").value;
+            alert(`Journal Saved: ${symptoms}`);
+        }
+    </script>
+</body>
+</html>
